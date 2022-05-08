@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  app:
+    build:
+      dockerfile: prod.dockerfile
+      context: ./
+    ports:
+      - 5000:5000
+    volumes:
+      - ./configs:/src/configs
+      - ./secrets:/src/secrets
+      - ./:/src
