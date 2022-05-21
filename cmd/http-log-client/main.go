@@ -7,36 +7,52 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 )
+
+type Profile struct {
+	Operation string `json:"operation"`
+	Name      string `json:"name"`
+	City      string `json:"city"`
+}
 
 var (
 	deliveryAddr = flag.String("d", "localhost:8001", "Delivery server address")
 )
-
-type Payload struct {
-	Operation string `json:"Operation"`
-	Name      string `json:"Name"`
-	City      string `json:"City"`
-}
 
 func buildPostUrl(baseUrl string, urlPath string) string {
 	return "http://" + baseUrl + urlPath
 }
 
 func makeRequest(targetRequestUrlPath string, ioBufferedValues *bytes.Buffer) {
+	// make requests
 	resp, err := http.Post(targetRequestUrlPath, "application/json", ioBufferedValues)
-
 	if err != nil {
 		log.Fatalln(err)
 	}
 
+	// close response body
+	defer resp.Body.Close()
+
+	// read body response
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalln(err)
+		log.Printf("Reading body failed: %s", err)
+		return
 	}
 
-	log.Println(string(body))
+	// see data that has been returned to the client
+	bodyString := string(body)
+	log.Print(bodyString)
+
+	post := Profile{}
+	err = json.Unmarshal(body, &post)
+	if err != nil {
+		log.Printf("Reading body failed: %s", err)
+		return
+	}
+
+	log.Printf("Profile::name %s", post.Name)
+	log.Printf("Profile::city %s", post.City)
 }
 
 func main() {
@@ -48,48 +64,20 @@ func main() {
 	log.Printf("Http target url is... %s\n", httpPostUrl)
 
 	// prepare data
-	params := url.Values{}
-	params.Add("Operation", "INSERT")
-	params.Add("Name", "Lucas")
-	params.Add("City", "FLN")
+	a := Profile{Operation: "INSERT", Name: "lucas", City: "fln"}
+	o := Profile{Operation: "INSERT", Name: "marina", City: "fln"}
+	var fs []Profile
+	fs = append(fs, a)
+	fs = append(fs, o)
+	log.Println(fs)
 
 	// prepare request
 	urlPath := buildPostUrl(httpPostUrl, "/db")
-	bytesRepresentation, err := json.Marshal(params)
+	bytesRepresentation, err := json.MarshalIndent(fs, "", "  ")
 	if err != nil {
 		log.Fatalln(err)
 	}
+
 	// make request
 	makeRequest(urlPath, bytes.NewBuffer(bytesRepresentation))
-
-	// if err != nil {
-	// 	log.Printf("Request Failed: %s", err)
-	// 	return
-	// }
-
-	// // close response body
-	// defer resp.Body.Close()
-
-	// body, err := ioutil.ReadAll(resp.Body)
-	// bodyString := string(body)
-
-	// if err != nil {
-	// 	log.Printf("Reading body failed: %s", err)
-	// 	return
-	// }
-
-	// // see data that has been returned to the client
-	// log.Print(bodyString)
-
-	// post := Payload{}
-	// err = json.Unmarshal(body, &post)
-
-	// if err != nil {
-	// 	log.Printf("Reading body failed: %s", err)
-	// 	return
-	// }
-
-	// log.Printf("Payload::Post added with Operation %s", post.Operation)
-	// log.Printf("Payload::Post added with Name %s", post.Name)
-	// log.Printf("Payload::Post added with City %s", post.City)
 }
