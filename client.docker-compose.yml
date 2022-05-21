@@ -1,7 +1,7 @@
 version: "3"
 
 services:
-  app:
+  http-log-client:
     build:
       dockerfile: client.dockerfile
       context: ./

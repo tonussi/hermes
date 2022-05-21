@@ -28,5 +28,5 @@ EXPOSE 5000
 
 FROM scratch
 COPY --from=build /go/bin/dlv /dlv
-COPY --from=build /go/src/work/app /app
+COPY --from=build /go/src/work/http-log-server /http-log-server
 ENTRYPOINT [ "/dlv" ]

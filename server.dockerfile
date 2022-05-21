@@ -19,10 +19,10 @@ COPY . .
 
 RUN go mod graph | awk '{if ($1 !~ "@") print $2}' | xargs go get
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -gcflags "all=-N -l" -o ./app ./cmd/http-log-server
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -gcflags "all=-N -l" -o ./http-log-server ./cmd/http-log-server
 # RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /bin/http-log-server ./cmd/http-log-server
 
 FROM scratch
-COPY --from=build /go/src/work/app /app
+COPY --from=build /go/src/work/http-log-server /http-log-server
 EXPOSE 8001
-ENTRYPOINT [ "/app" ]
+ENTRYPOINT [ "/http-log-server" ]
