@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"io/ioutil"
@@ -23,6 +24,21 @@ func buildPostUrl(baseUrl string, urlPath string) string {
 	return "http://" + baseUrl + urlPath
 }
 
+func makeRequest(targetRequestUrlPath string, ioBufferedValues *bytes.Buffer) {
+	resp, err := http.Post(targetRequestUrlPath, "application/json", ioBufferedValues)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Println(string(body))
+}
+
 func main() {
 	// parse arguments
 	flag.Parse()
@@ -38,36 +54,42 @@ func main() {
 	params.Add("City", "FLN")
 
 	// prepare request
-	resp, err := http.PostForm(buildPostUrl(httpPostUrl, "/db"), params)
-
+	urlPath := buildPostUrl(httpPostUrl, "/db")
+	bytesRepresentation, err := json.Marshal(params)
 	if err != nil {
-		log.Printf("Request Failed: %s", err)
-		return
+		log.Fatalln(err)
 	}
+	// make request
+	makeRequest(urlPath, bytes.NewBuffer(bytesRepresentation))
 
-	// close response body
-	defer resp.Body.Close()
+	// if err != nil {
+	// 	log.Printf("Request Failed: %s", err)
+	// 	return
+	// }
 
-	body, err := ioutil.ReadAll(resp.Body)
-	bodyString := string(body)
+	// // close response body
+	// defer resp.Body.Close()
 
-	if err != nil {
-		log.Printf("Reading body failed: %s", err)
-		return
-	}
+	// body, err := ioutil.ReadAll(resp.Body)
+	// bodyString := string(body)
 
-	// see data that has been returned to the client
-	log.Print(bodyString)
+	// if err != nil {
+	// 	log.Printf("Reading body failed: %s", err)
+	// 	return
+	// }
 
-	post := Payload{}
-	err = json.Unmarshal(body, &post)
+	// // see data that has been returned to the client
+	// log.Print(bodyString)
 
-	if err != nil {
-		log.Printf("Reading body failed: %s", err)
-		return
-	}
+	// post := Payload{}
+	// err = json.Unmarshal(body, &post)
 
-	log.Printf("Payload::Post added with Operation %s", post.Operation)
-	log.Printf("Payload::Post added with Name %s", post.Name)
-	log.Printf("Payload::Post added with City %s", post.City)
+	// if err != nil {
+	// 	log.Printf("Reading body failed: %s", err)
+	// 	return
+	// }
+
+	// log.Printf("Payload::Post added with Operation %s", post.Operation)
+	// log.Printf("Payload::Post added with Name %s", post.Name)
+	// log.Printf("Payload::Post added with City %s", post.City)
 }
