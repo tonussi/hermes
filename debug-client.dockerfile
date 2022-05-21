@@ -23,9 +23,9 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go get -ldflags "-s -w -extldflags '-s
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -gcflags "all=-N -l" -o ./http-log-client ./cmd/http-log-client
 # RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /bin/http-log-client ./cmd/http-log-client
 
-EXPOSE 2345
 
 FROM scratch
 COPY --from=build /go/bin/dlv /dlv
 COPY --from=build /go/src/work/http-log-client /http-log-client
+EXPOSE 2345
 ENTRYPOINT [ "/dlv" ]
