@@ -23,7 +23,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go get -ldflags "-s -w -extldflags '-s
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -gcflags "all=-N -l" -o ./app ./cmd/http-log-server
 # RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /bin/http-log-server ./cmd/http-log-server
 
-
 FROM scratch
 COPY --from=build /go/bin/dlv /dlv
 COPY --from=build /go/src/work/http-log-server /http-log-server
