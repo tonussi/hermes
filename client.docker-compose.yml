@@ -5,5 +5,6 @@ services:
     build:
       dockerfile: client.dockerfile
       context: ./
-      args:
-        - -d=:8001
+    command:
+      - "-d"
+      - "localhost:8001"

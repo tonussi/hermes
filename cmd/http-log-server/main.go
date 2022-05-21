@@ -83,12 +83,11 @@ func main() {
 
 	http.HandleFunc("/", hello)
 
-	log.Printf("Starting server for testing HTTP POST...\n")
-
 	httpPostUrl := *listenAddr
-	log.Printf("Http target url is... %s\n", httpPostUrl)
 
-	if err := http.ListenAndServe(httpPostUrl, nil); err != nil {
+	log.Printf("Starting server %s\n", httpPostUrl)
+
+	if err := http.ListenAndServe(*listenAddr, nil); err != nil {
 		log.Fatal(err)
 	}
 }

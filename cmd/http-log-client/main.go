@@ -10,13 +10,17 @@ import (
 )
 
 var (
-	deliveryAddr = flag.String("d", ":8001", "Delivery server address")
+	deliveryAddr = flag.String("d", "localhost:8001", "Delivery server address")
 )
 
 type Payload struct {
 	Operation string `json:"Operation"`
 	Name      string `json:"Name"`
 	City      string `json:"City"`
+}
+
+func buildPostUrl(baseUrl string, urlPath string) string {
+	return "http://" + baseUrl + urlPath
 }
 
 func main() {
@@ -34,14 +38,14 @@ func main() {
 	params.Add("City", "FLN")
 
 	// prepare request
-	resp, err := http.PostForm(httpPostUrl+"/db", params)
-	resp.Header.Set("Content-Type", "application/json")
+	resp, err := http.PostForm(buildPostUrl(httpPostUrl, "/db"), params)
 
 	if err != nil {
 		log.Printf("Request Failed: %s", err)
 		return
 	}
 
+	// close response body
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -52,6 +56,7 @@ func main() {
 		return
 	}
 
+	// see data that has been returned to the client
 	log.Print(bodyString)
 
 	post := Payload{}

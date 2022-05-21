@@ -5,8 +5,9 @@ services:
     build:
       dockerfile: server.dockerfile
       context: ./
-      args:
-        - -l=:8001
+    command:
+      - "-l"
+      - ":8001"
     ports:
       - 8001:8001
     volumes:

@@ -5,9 +5,6 @@ services:
     build:
       dockerfile: debug-client.dockerfile
       context: ./
-      args:
-        - "-d"
-        - "localhost:8001"
     ports:
       - 2345:2345
     command: "--listen=:2345 --headless=true --log=true --log-output=debugger,debuglineerr,gdbwire,lldbout,rpc --accept-multiclient --api-version=2 exec ./http-log-client"
