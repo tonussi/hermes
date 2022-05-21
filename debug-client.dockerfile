@@ -24,7 +24,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -gcflags "all=-N -l" -o ./htt
 # RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /bin/http-log-client ./cmd/http-log-client
 
 EXPOSE 2345
-EXPOSE 5000
 
 FROM scratch
 COPY --from=build /go/bin/dlv /dlv
