@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  http-log-server:
+    image: lptonussi/public:http-log-server
+    command:
+      - "--address=http-log-server"
+      - "--port=8001"
+      - "--log_path=/tmp/throughput.log"
+      - "--buffer_size=256"
+      - "--value_size=128"
+      - "--mutex_onoff=True"
+    ports:
+      - 8001:8001
+    networks:
+      - fullstack
+  http-log-client:
+    build:
+      dockerfile: client.dockerfile
+      context: ./
+    command:
+      - "-d"
+      - "192.168.49.1:8001"
+    networks:
+      - fullstack
+    deploy:
+      mode: replicated
+      replicas: 6
+    depends_on:
+      - http-log-server
+    links:
+      - http-log-server
+    restart: on-failure:5
+networks:
+  fullstack:
+    driver: bridge

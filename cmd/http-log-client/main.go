@@ -15,6 +15,10 @@ type Profile struct {
 	City      string `json:"city"`
 }
 
+type Batch struct {
+	Batch []Profile `json:"batch"`
+}
+
 var (
 	deliveryAddr = flag.String("d", "localhost:8001", "Delivery server address")
 )
@@ -63,17 +67,24 @@ func main() {
 	httpPostUrl := *deliveryAddr
 	log.Printf("Http target url is... %s\n", httpPostUrl)
 
-	// prepare data
-	a := Profile{Operation: "INSERT", Name: "lucas", City: "fln"}
-	o := Profile{Operation: "INSERT", Name: "marina", City: "fln"}
-	var fs []Profile
-	fs = append(fs, a)
-	fs = append(fs, o)
-	log.Println(fs)
+	// begin :: made up payload
+	profile1 := Profile{Operation: "INSERT", Name: "lucas", City: "fln"}
+	profile2 := Profile{Operation: "INSERT", Name: "marina", City: "fln"}
+
+	var profiles []Profile
+
+	profiles = append(profiles, profile1)
+	profiles = append(profiles, profile2)
+
+	log.Println(profiles)
+
+	// end :: made up payload
+	batches := Batch{Batch: profiles}
+	log.Println(batches)
 
 	// prepare request
 	urlPath := buildPostUrl(httpPostUrl, "/db")
-	bytesRepresentation, err := json.MarshalIndent(fs, "", "  ")
+	bytesRepresentation, err := json.MarshalIndent(batches, "", "  ")
 	if err != nil {
 		log.Fatalln(err)
 	}
