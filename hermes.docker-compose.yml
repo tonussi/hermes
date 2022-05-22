@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  hermes-leader:
+    build:
+      dockerfile: hermes.dockerfile
+      context: ./
+    environment:
+      - NODE_ID=hermes-leader
+    command:
+      - "-d"
+      - ":8001"
+    ports:
+      - 8000:8000
+      - 9000:9000
+      - 10000:10000
+  hermes-follower:
+    build:
+      dockerfile: hermes.dockerfile
+      context: ./
+    environment:
+      - NODE_ID=hermes-follower
+    ports:
+      - 9000:9000
+      - 10000:10000
+    command:
+      - "-j"
+      - "hermes-leader:9000"
+    depends_on:
+      - hermes-leader
+networks:
+  fullstack:
+    driver: bridge
