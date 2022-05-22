@@ -1,6 +1,38 @@
 version: "3"
 
 services:
+  http-log-server:
+    image: lptonussi/public:http-log-server
+    environment:
+      - NODE_ID=http-log-server
+    command:
+      - "--address=localhost"
+      - "--port=8001"
+      - "--log_path=/tmp/throughput.log"
+      - "--buffer_size=256"
+      - "--value_size=128"
+      - "--mutex_onoff=True"
+    ports:
+      - 8001:8001
+    networks:
+      - fullstack
+  http-log-client:
+    build:
+      dockerfile: client.dockerfile
+      context: ./
+    environment:
+      - NODE_ID=http-log-client
+    command:
+      - "-d"
+      - "hermes-leader:8000"
+    networks:
+      - fullstack
+    depends_on:
+      - http-log-server
+    links:
+      - http-log-server
+    restart: on-failure:5
+
   hermes-leader:
     build:
       dockerfile: hermes.dockerfile
@@ -9,7 +41,12 @@ services:
       - NODE_ID=hermes-leader
     command:
       - "-d"
-      - ":8001"
+      - "http-log-server:8001"
+    ports:
+      - 8000:8000
+    depends_on:
+      - http-log-server
+      - http-log-client
   hermes-follower:
     build:
       dockerfile: hermes.dockerfile
@@ -19,8 +56,13 @@ services:
     command:
       - "-j"
       - "hermes-leader:9000"
+    ports:
+      - 9000:9000
+      - 10000:10000
     depends_on:
       - hermes-leader
+      - http-log-server
+      - http-log-client
 networks:
   fullstack:
     driver: bridge
