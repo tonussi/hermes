@@ -116,7 +116,9 @@ func main() {
 	log.Printf("Starting listening from server %s\n", listenHttpPostUrl)
 	log.Printf("Starting delivering to server %s\n", deliveryTarget)
 
-	if err := http.ListenAndServe(*listenAddr, nil); err != nil {
+	err := http.ListenAndServe(listenHttpPostUrl, nil)
+	if err != nil {
 		log.Fatal(err)
+		return
 	}
 }
