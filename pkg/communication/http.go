@@ -13,35 +13,19 @@ import (
 	"github.com/r3musketeers/hermes/pkg/proxy"
 )
 
-func getRoot(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("got / request\n")
-	io.WriteString(w, "This is my website!\n")
-}
-
-func postDb(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("got /db request\n")
-	io.WriteString(w, "This is my website!\n")
-}
-
-func getLine(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("got /line request\n")
-	io.WriteString(w, "Hello, HTTP!\n")
-}
-
-func serverHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("got /line request\n")
-	io.WriteString(w, "Hello, HTTP!\n")
-}
-
 type HTTPCommunicator struct {
-	listener    string
-	deliverConn string
+	listener    *int
+	deliverConn *int
 
 	connsMux   sync.RWMutex
 	connsCount int
 
 	bufferSize     int
 	responseBuffer []byte
+}
+
+func urlPathHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Entrou urlPathHandler")
 }
 
 func NewHTTPCommunicator(
@@ -51,14 +35,20 @@ func NewHTTPCommunicator(
 	connAttemptPeriod time.Duration,
 	bufferSize int,
 ) (*HTTPCommunicator, error) {
+	http.HandleFunc("/", urlPathHandler)
+
+	httpPostUrl := fromAddr
+
+	log.Printf("Starting server %s\n", httpPostUrl)
+
+	if err := http.ListenAndServe(fromAddr, nil); err != nil {
+		log.Fatal(err)
+	}
+
 	deliverAddr, err := net.ResolveTCPAddr("tcp", toAddr)
 	if err != nil {
 		return nil, err
 	}
-
-	http.Handle("/", getRoot)
-	http.Handle("/db", postDb)
-	http.Handle("/line", getLine)
 
 	var deliverConn *net.TCPConn
 
@@ -79,15 +69,7 @@ func NewHTTPCommunicator(
 		return nil, err
 	}
 
-	// listener, err := net.ListenTCP("tcp", listenAddr)
-	listener := &http.Server{
-		Addr:           listenAddr,
-		Handler:        serverHandler,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
-	}
-	log.Fatal(listener.ListenAndServe())
+	listener, err := net.ListenTCP("tcp", listenAddr)
 	if err != nil {
 		return nil, err
 	}

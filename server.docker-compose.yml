@@ -14,3 +14,4 @@ services:
       - ./configs:/src/configs
       - ./secrets:/src/secrets
       - ./:/src
+    network_mode: "host"

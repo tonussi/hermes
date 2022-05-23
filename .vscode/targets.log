@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sat May 21 23:03:56 2022
+# Make data base, printed on Sun May 22 19:41:07 2022
 
 # Variables
 
@@ -49,7 +49,7 @@ VSCODE_NLS_CONFIG = {"locale":"en-us","availableLanguages":{},"_languagePackSupp
 # environment
 _ = /usr/bin/dbus-update-activation-environment
 # environment
-JOURNAL_STREAM = 8:74562
+JOURNAL_STREAM = 8:73611
 # environment
 XDG_CONFIG_DIRS = /etc/xdg/xdg-ubuntu:/etc/xdg
 # makefile (from 'Makefile', line 1)
@@ -75,9 +75,9 @@ VSCODE_VERBOSE_LOGGING = true
 # environment
 LC_CTYPE = pt_BR.UTF-8
 # environment
-MANAGERPID = 5103
+MANAGERPID = 5133
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-73428e61-efe9-4354-a13d-af14c16c92cd.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-b8fd7ed1-7c37-43bc-9512-a9b1580f8bc3.sock
 # environment
 LC_NAME = pt_BR.UTF-8
 # environment
@@ -93,7 +93,7 @@ GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
 # environment
 GJS_DEBUG_OUTPUT = stderr
 # environment
-SESSION_MANAGER = local/arksy-Aspire-VX5-591G:@/tmp/.ICE-unix/5393,unix/arksy-Aspire-VX5-591G:/tmp/.ICE-unix/5393
+SESSION_MANAGER = local/arksy-Aspire-VX5-591G:@/tmp/.ICE-unix/5403,unix/arksy-Aspire-VX5-591G:/tmp/.ICE-unix/5403
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # environment
@@ -105,7 +105,7 @@ VSCODE_LOG_STACK = false
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-INVOCATION_ID = 0454bddbefb34419aa41d31454f5b835
+INVOCATION_ID = fed12c8467a44af0bd4bd6c19a3d2596
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
 # environment
@@ -113,7 +113,7 @@ XDG_SESSION_DESKTOP = ubuntu
 # environment
 SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 7843
+GIO_LAUNCHED_DESKTOP_FILE_PID = 7628
 # automatic
 %F = $(notdir $%)
 # environment
@@ -122,10 +122,12 @@ DISPLAY = :1
 VSCODE_PIPE_LOGGING = true
 # environment
 PWD = /home/arksy/Documents/faculdade/k8s/studygo
+# makefile (from 'Makefile', line 1)
+DOCKERHUB_USER_NAME = lptonussi
 # default
 .LOADED := 
 # environment
-SSH_AGENT_PID = 5347
+SSH_AGENT_PID = 5365
 # environment
 ORIGINAL_XDG_CURRENT_DESKTOP = ubuntu:GNOME
 # environment
@@ -139,7 +141,7 @@ VSCODE_CODE_CACHE_PATH = /home/arksy/.config/Code/CachedData/c3511e6c69bb39013c4
 # environment
 LOGNAME = arksy
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # automatic
 +F = $(notdir $+)
 # environment
@@ -229,9 +231,9 @@ LC_ADDRESS = pt_BR.UTF-8
 # environment
 LANG = C
 # environment
-VSCODE_PID = 7843
+VSCODE_PID = 7628
 # variable set hash-table stats:
-# Load=109/1024=11%, Rehash=0, Collisions=20/134=15%
+# Load=110/1024=11%, Rehash=0, Collisions=20/135=15%
 
 # Pattern-specific Variable Values
 
@@ -239,9 +241,9 @@ VSCODE_PID = 7843
 
 # Directories
 
-# . (device 57, inode 55842195): 23 files, no impossibilities.
+# . (device 57, inode 55842195): 27 files, no impossibilities.
 
-# 23 files, no impossibilities in 1 directories.
+# 27 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -249,167 +251,170 @@ VSCODE_PID = 7843
 
 # Files
 
+build_client_with_python_server:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 22):
+ 
+	docker-compose -f go-client-python-server.docker-compose.yml up --build
+
+docker_down:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 79):
+	docker-compose -f go-client-python-server.docker-compose.yml down
+	docker-compose -f client.docker-compose.yml down
+	docker-compose -f server.docker-compose.yml down
+
+docker_build_client:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 67):
+	docker build -t ${DOCKERHUB_USER_NAME}/public:go-http-log-client -f client.dockerfile .
+
 # Not a target:
 all:
 #  Command line target.
 #  Implicit rule search has been done.
 #  File does not exist.
 #  File has not been updated.
+ 
 
 run_debug_client:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 8):
+#  recipe to execute (from 'Makefile', line 30):
 	docker-compose -f debug-client.docker-compose.yml up
 
 build_client:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 20):
+#  recipe to execute (from 'Makefile', line 19):
 	docker-compose -f client.docker-compose.yml up --build
 
 run_hermes:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 29):
+#  recipe to execute (from 'Makefile', line 58):
 	docker-compose -f hermes.docker-compose.yml up
 
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-05-21 21:53:56.905107572
- 
+#  Last modified 2022-05-22 02:46:31.958444812
 #  File has been updated.
- 
 #  Successfully updated.
- 
 
- 
 build_server:
- 
 #  Implicit rule search has not been done.
- 
 #  Modification time never checked.
- 
 #  File has not been updated.
- 
-#  recipe to execute (from 'Makefile', line 17):
- 
+#  recipe to execute (from 'Makefile', line 13):
 	docker-compose -f server.docker-compose.yml up --build
- 
 
- 
 run_debug_server:
- 
 #  Implicit rule search has not been done.
- 
 #  Modification time never checked.
- 
 #  File has not been updated.
- 
-#  recipe to execute (from 'Makefile', line 14):
- 
+#  recipe to execute (from 'Makefile', line 36):
 	docker-compose -f debug-server.docker-compose.yml up
- 
 
- 
+docker_run_client:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 70):
+	docker run --name go-http-log-client ${DOCKERHUB_USER_NAME}/public:go-http-log-client
+
 run_client:
- 
 #  Implicit rule search has not been done.
- 
 #  Modification time never checked.
- 
 #  File has not been updated.
- 
-#  recipe to execute (from 'Makefile', line 26):
- 
+#  recipe to execute (from 'Makefile', line 42):
 	docker-compose -f client.docker-compose.yml up
- 
 
- 
+run_go_http_log_client:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 55):
+	docker-compose -f go-client-python-server.docker-compose.yml up http-log-client
+
 # Not a target:
- 
 .DEFAULT:
- 
 #  Implicit rule search has not been done.
- 
 #  Modification time never checked.
- 
 #  File has not been updated.
- 
 
- 
 run_server:
- 
 #  Implicit rule search has not been done.
- 
 #  Modification time never checked.
- 
 #  File has not been updated.
- 
-#  recipe to execute (from 'Makefile', line 23):
- 
+#  recipe to execute (from 'Makefile', line 39):
 	docker-compose -f server.docker-compose.yml up
- 
 
- 
+build_debug_hermes:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 10):
+	docker-compose -f debug-hermes.docker-compose.yml up --build
+
+run_python_http_log_server:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 52):
+	docker-compose -f go-client-python-server.docker-compose.yml up http-log-server
+
 build_debug_client:
- 
 #  Implicit rule search has not been done.
- 
 #  Modification time never checked.
- 
 #  File has not been updated.
- 
-#  recipe to execute (from 'Makefile', line 5):
- 
+#  recipe to execute (from 'Makefile', line 7):
 	docker-compose -f debug-client.docker-compose.yml up --build
- 
 
- 
+build_hermes:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 16):
+	docker-compose -f hermes.docker-compose.yml up --build
+
 run_debug_hermes:
- 
 #  Implicit rule search has not been done.
- 
 #  Modification time never checked.
- 
 #  File has not been updated.
- 
-#  recipe to execute (from 'Makefile', line 11):
- 
+#  recipe to execute (from 'Makefile', line 33):
 	docker-compose -f debug-hermes.docker-compose.yml up
- 
 
- 
 build_debug_server:
- 
 #  Implicit rule search has not been done.
- 
 #  Modification time never checked.
- 
 #  File has not been updated.
- 
-#  recipe to execute (from 'Makefile', line 2):
+#  recipe to execute (from 'Makefile', line 4):
 	docker-compose -f debug-server.docker-compose.yml up --build
 
 # files hash-table stats:
- 
-# Load=14/1024=1%, Rehash=0, Collisions=1/24=4%
+# Load=22/1024=2%, Rehash=0, Collisions=1/32=3%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 38 / storage = 512 B / avg = 13 B
-# current buf: size = 8162 B / used = 512 B / count = 38 / avg = 13 B
+# strcache buffers: 1 (0) / strings = 50 / storage = 806 B / avg = 16 B
+# current buf: size = 8162 B / used = 806 B / count = 50 / avg = 16 B
 
-# strcache performance: lookups = 52 / hit rate = 26%
+# strcache performance: lookups = 72 / hit rate = 30%
 # hash-table stats:
-# Load=38/8192=0%, Rehash=0, Collisions=1/52=2%
-# Finished Make data base on Sat May 21 23:03:56 2022
+# Load=50/8192=1%, Rehash=0, Collisions=1/72=1%
+# Finished Make data base on Sun May 22 19:41:07 2022
 
  

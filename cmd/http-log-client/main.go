@@ -48,15 +48,15 @@ func makeRequest(targetRequestUrlPath string, ioBufferedValues *bytes.Buffer) {
 	bodyString := string(body)
 	log.Print(bodyString)
 
-	post := Profile{}
-	err = json.Unmarshal(body, &post)
-	if err != nil {
-		log.Printf("Reading body failed: %s", err)
-		return
-	}
+	// post := Profile{}
+	// err = json.Unmarshal(body, &post)
+	// if err != nil {
+	// 	log.Printf("Reading body failed: %s", err)
+	// 	return
+	// }
 
-	log.Printf("Profile::name %s", post.Name)
-	log.Printf("Profile::city %s", post.City)
+	// log.Printf("Profile::name %s", post.Name)
+	// log.Printf("Profile::city %s", post.City)
 }
 
 func main() {
