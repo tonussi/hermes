@@ -90,3 +90,4 @@ docker_down:
 	docker-compose -f go-client-python-server.docker-compose.yml down
 	docker-compose -f client.docker-compose.yml down
 	docker-compose -f server.docker-compose.yml down
+	docker-compose -f hermes.docker-compose.yml down

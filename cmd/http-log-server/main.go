@@ -18,6 +18,7 @@ type HttpDelivery struct {
 	payload []byte
 }
 
+// this method could be used to optimize the hermes
 // func whichMethod(w http.ResponseWriter, r *http.Request) {
 // 	switch r.Method {
 // 	case "POST":

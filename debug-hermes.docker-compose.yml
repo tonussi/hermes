@@ -5,6 +5,10 @@ services:
     build:
       dockerfile: debug-hermes.dockerfile
       context: ./
+    environment:
+      - NODE_ID=debug-hermes
+      - PROTOCOL_IP=localhost
+      - PROTOCOL_PORT=10000
     ports:
       - 8000:8000
       - 9000:9000
