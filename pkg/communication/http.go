@@ -22,9 +22,11 @@ func NewHTTPCommunicator(
 	connAttempts int,
 	connAttemptPeriod time.Duration,
 ) (*HTTPCommunicator, error) {
-
 	var resp http.Response
 	var err error
+
+	// check readliness
+	// to see if its responding
 	for connAttempts > 0 {
 		log.Println("connection attempts left:", connAttempts)
 		resp, err := http.Get(toAddr)
@@ -113,6 +115,8 @@ func (comm *HTTPCommunicator) getBodyAsBytes(r *http.Request) []byte {
 }
 
 func (comm *HTTPCommunicator) requestHandler(w http.ResponseWriter, r *http.Request, handle proxy.HandleIncomingMessageFunc) {
+	comm.urlPath = r.URL.Path
+
 	go comm.handleConnection(r, handle)
 }
 
