@@ -12,11 +12,10 @@ import (
 )
 
 var (
-	listenAddr     = flag.String("l", ":8000", "listen requests address")
-	deliveryAddr   = flag.String("d", ":8001", "delivery server address")
-	listenJoinAddr = flag.String("k", ":9000", "listen join requests address")
-	bufferSize     = flag.Int("b", 2048, "requests buffer size")
-	joinAddr       = flag.String("j", "debug-hermes:9000", "join address")
+	listenAddr     = flag.String("l", "localhost:8000", "listen requests address")
+	deliveryAddr   = flag.String("d", "localhost:8001", "delivery server address")
+	listenJoinAddr = flag.String("k", "localhost:9000", "listen join requests address")
+	joinAddr       = flag.String("j", "localhost:9000", "join address")
 )
 
 func main() {

@@ -22,20 +22,25 @@ func NewHTTPCommunicator(
 	connAttempts int,
 	connAttemptPeriod time.Duration,
 ) (*HTTPCommunicator, error) {
-	var resp http.Response
-	var err error
-
 	// check readliness
 	// to see if its responding
+	resp, err := http.Get("http://" + toAddr)
 	for connAttempts > 0 {
+		if resp.StatusCode == 200 {
+			break
+		}
+		resp, err := http.Get("http://" + toAddr)
 		log.Println("connection attempts left:", connAttempts)
-		resp, err := http.Get(toAddr)
+		log.Println("connection attempts left:", resp)
 		if resp.StatusCode != 200 || err != nil {
 			connAttempts--
 			time.Sleep(connAttemptPeriod)
 		}
+		if connAttempts == 0 {
+			return nil, err
+		}
 	}
-	if resp.StatusCode != 200 && err != nil {
+	if resp.StatusCode != 200 || err != nil {
 		return nil, err
 	}
 
