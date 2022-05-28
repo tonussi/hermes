@@ -6,15 +6,15 @@ type HandleOrderedMessageFunc func([]byte) ([]byte, error)
 
 var (
 	_communicator Communicator
-	// _orderer      Orderer
+	_orderer      Orderer
 )
 
 func Init(
 	communicator Communicator,
-	// orderer Orderer,
+	orderer Orderer,
 ) {
 	_communicator = communicator
-	// _orderer = orderer
+	_orderer = orderer
 }
 
 type HermesProxy struct {
@@ -24,11 +24,11 @@ type HermesProxy struct {
 
 func NewHermesProxy(
 	communicator Communicator,
-	// orderer Orderer,
+	orderer Orderer,
 ) *HermesProxy {
 	return &HermesProxy{
 		communicator: communicator,
-		// orderer:      orderer,
+		orderer:      orderer,
 	}
 }
 

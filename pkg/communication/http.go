@@ -101,10 +101,15 @@ func (comm *HTTPCommunicator) requestHandler(w http.ResponseWriter, r *http.Requ
 	resp, err := handle(bodyBytes)
 
 	if err != nil {
-		fmt.Fprintf(w, "%s\n", err.Error())
+		log.Fatalln(err)
 	}
 
-	fmt.Fprintf(w, "%+v\n", payloadBytesAsBufferedReader(resp))
+	bodyString := string(resp)
+	log.Print(bodyString)
+	fmt.Fprintf(w, "%+v", resp)
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
 
 func (comm *HTTPCommunicator) buildHttpUrlPath() string {
