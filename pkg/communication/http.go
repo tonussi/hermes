@@ -2,6 +2,7 @@ package communication
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,10 +12,9 @@ import (
 )
 
 type HTTPCommunicator struct {
-	fromAddr  string
-	toAddr    string
-	urlPath   string
-	bodyBytes []byte
+	fromAddr string
+	toAddr   string
+	urlPath  string
 }
 
 func NewHTTPCommunicator(
@@ -46,10 +46,9 @@ func NewHTTPCommunicator(
 	}
 
 	return &HTTPCommunicator{
-		fromAddr:  fromAddr,
-		toAddr:    toAddr,
-		urlPath:   "",
-		bodyBytes: nil,
+		fromAddr: fromAddr,
+		toAddr:   toAddr,
+		urlPath:  "/",
 	}, nil
 }
 
@@ -95,10 +94,17 @@ func (comm *HTTPCommunicator) Deliver(data []byte) ([]byte, error) {
 
 func (comm *HTTPCommunicator) requestHandler(w http.ResponseWriter, r *http.Request, handle proxy.HandleIncomingMessageFunc) {
 	comm.urlPath = r.URL.Path
-	comm.bodyBytes, _ = ioutil.ReadAll(r.Body)
+	bodyBytes, _ := ioutil.ReadAll(r.Body)
 
-	log.Println("handling connection")
-	handle(comm.bodyBytes)
+	log.Println("handling connection reading bytes and sending to handler")
+
+	resp, err := handle(bodyBytes)
+
+	if err != nil {
+		fmt.Fprintf(w, "%s\n", err.Error())
+	}
+
+	fmt.Fprintf(w, "%+v\n", payloadBytesAsBufferedReader(resp))
 }
 
 func (comm *HTTPCommunicator) buildHttpUrlPath() string {
