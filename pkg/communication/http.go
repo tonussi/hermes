@@ -7,13 +7,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/r3musketeers/hermes/pkg/proxy"
+	"github.com/tonussi/studygo/pkg/proxy"
 )
 
 type HTTPCommunicator struct {
-	fromAddr string
-	toAddr   string
-	urlPath  string
+	fromAddr  string
+	toAddr    string
+	urlPath   string
+	bodyBytes []byte
 }
 
 func NewHTTPCommunicator(
@@ -45,9 +46,10 @@ func NewHTTPCommunicator(
 	}
 
 	return &HTTPCommunicator{
-		fromAddr: fromAddr,
-		toAddr:   toAddr,
-		urlPath:  "/",
+		fromAddr:  fromAddr,
+		toAddr:    toAddr,
+		urlPath:   "",
+		bodyBytes: nil,
 	}, nil
 }
 
@@ -55,17 +57,13 @@ func (comm *HTTPCommunicator) Listen(handle proxy.HandleIncomingMessageFunc) err
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { comm.requestHandler(w, r, handle) })
 
 	err := http.ListenAndServe(comm.fromAddr, nil)
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
 
-	return nil
+	return err
 }
 
 func (comm *HTTPCommunicator) Deliver(data []byte) ([]byte, error) {
 	// build url to post
-	deliveryFullUrlString := comm.addProtocolAndBuildUrl()
+	deliveryFullUrlString := comm.buildHttpUrlPath()
 
 	// payload bytes as buffered reader
 	bufferedPayload := payloadBytesAsBufferedReader(data)
@@ -95,48 +93,18 @@ func (comm *HTTPCommunicator) Deliver(data []byte) ([]byte, error) {
 
 // Extra functions to clean code a little bit
 
-type HttpDelivery struct {
-	urlPath string
-	payload []byte
-}
-
-func (comm *HTTPCommunicator) encapsulateDelivery(r *http.Request, handle proxy.HandleIncomingMessageFunc) HttpDelivery {
-	return HttpDelivery{
-		urlPath: r.URL.Path,
-		payload: comm.getBodyAsBytes(r),
-	}
-}
-
-func (comm *HTTPCommunicator) getBodyAsBytes(r *http.Request) []byte {
-	bodyBytes, err := ioutil.ReadAll(r.Body)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("%b", bodyBytes)
-
-	return bodyBytes
-}
-
 func (comm *HTTPCommunicator) requestHandler(w http.ResponseWriter, r *http.Request, handle proxy.HandleIncomingMessageFunc) {
 	comm.urlPath = r.URL.Path
+	comm.bodyBytes, _ = ioutil.ReadAll(r.Body)
 
-	go comm.handleConnection(r, handle)
+	log.Println("handling connection")
+	handle(comm.bodyBytes)
 }
 
-func (comm *HTTPCommunicator) addProtocolAndBuildUrl() string {
+func (comm *HTTPCommunicator) buildHttpUrlPath() string {
 	return "http://" + comm.toAddr + comm.urlPath
 }
 
 func payloadBytesAsBufferedReader(data []byte) (ioBufferedValues *bytes.Buffer) {
 	return bytes.NewBuffer(data)
-}
-
-func (comm *HTTPCommunicator) handleConnection(r *http.Request, handle proxy.HandleIncomingMessageFunc) {
-	log.Println("handling connection")
-
-	encapsulateDelivery := comm.encapsulateDelivery(r, handle)
-
-	handle(encapsulateDelivery.payload)
 }

@@ -11,8 +11,7 @@ ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 
 RUN go mod graph | awk '{if ($1 !~ "@") print $2}' | xargs go get
 
-# RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -gcflags "all=-N -l" -o ./hermes ./cmd/hermes
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o ./hermes ./cmd/hermes
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -gcflags "all=-N -l" -o ./hermes ./cmd/hermes
 
 FROM scratch
 COPY --from=build /go/src/work/hermes /hermes
