@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/r3musketeers/hermes/pkg/communication"
-	hashicorpraft "github.com/r3musketeers/hermes/pkg/ordering/hashicorp-raft"
-	"github.com/r3musketeers/hermes/pkg/proxy"
+	"github.com/tonussi/studygo/pkg/communication"
+	hashicorpraft "github.com/tonussi/studygo/pkg/ordering/hashicorp-raft"
+	"github.com/tonussi/studygo/pkg/proxy"
 )
 
 var (
