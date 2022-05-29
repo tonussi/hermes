@@ -28,6 +28,8 @@ do
     printf "\n"
 done
 
-wc -l /tmp/logs/operations.log
+echo "executar as seguintes linhas"
 
-cat /tmp/logs/operations.log
+echo wc -l /tmp/logs/operations.log
+
+echo cat /tmp/logs/operations.log
