@@ -18,14 +18,12 @@ build_debug_client:
 	docker-compose -f debug-client.docker-compose.yml up --build
 
 build_debug_hermes:
-	sudo rm -rf ./data
 	docker-compose -f debug-hermes.docker-compose.yml up --build
 
 build_server:
 	docker-compose -f server.docker-compose.yml up --build
 
 build_hermes:
-	sudo rm -rf ./data
 	docker-compose -f hermes.docker-compose.yml up --build
 
 build_client:
@@ -43,7 +41,6 @@ run_debug_client:
 	docker-compose -f debug-client.docker-compose.yml up
 
 run_debug_hermes:
-	sudo rm -rf ./data
 	docker-compose -f debug-hermes.docker-compose.yml up
 
 run_debug_server:
@@ -69,7 +66,6 @@ run_go_http_log_client:
 	docker-compose -f go-client-python-server.docker-compose.yml up http-log-client
 
 run_hermes:
-	sudo rm -rf ./data
 	docker-compose -f hermes.docker-compose.yml up
 
 

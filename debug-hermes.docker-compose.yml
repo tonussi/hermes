@@ -1,38 +1,32 @@
 version: "3"
-
 services:
-  # http-log-server:
-  #   image: lptonussi/public:http-log-server
-  #   environment:
-  #     - NODE_ID=http-log-server
-  #   command:
-  #     - "--address=localhost"
-  #     - "--port=8001"
-  #   ports:
-  #     - 8001:8001
-  #   network_mode: host
-  # http-log-client:
-  #   image: lptonussi/public:http-log-server
-  #   environment:
-  #     - NODE_ID=http-log-client
-  #   command:
-  #     - "--address=hermes-leader"
-  #     - "--port=8000"
-  #   network_mode: host
-  #   depends_on:
-  #     - http-log-server
-  #   restart: on-failure:1
   hermes-leader:
     build:
       dockerfile: debug-hermes.dockerfile
       context: ./
     volumes:
-      - ./data/hermes/:/data/hermes/
+      - /tmp/data/hermes/:/data/hermes/
     environment:
       - NODE_ID=localhost
       - PROTOCOL_IP=localhost
       - PROTOCOL_PORT=10000
     ports:
+      - 8000:8000
+      - 9000:9000
+      - 10000:10000
       - 2345:2345
-    command: "--listen=:2345 --headless=true --log=true --log-output=debugger,debuglineerr,gdbwire,lldbout,rpc --accept-multiclient --api-version=2 exec ./hermes"
+    # command: "--listen=:2345 --headless=true --log=true --log-output=debugger,debuglineerr,gdbwire,lldbout,rpc --accept-multiclient --api-version=2 exec ./hermes"
+    command: "--listen=:2345 --headless=true --log=true --accept-multiclient --api-version=2 exec ./hermes"
     network_mode: host
+  # hermes-follower1:
+  #   image: r3musketeers/hermes
+  #   command: "-j localhost:9000"
+  #   environment:
+  #     - NODE_ID=localhost
+  #     - PROTOCOL_IP=localhost
+  #     - PROTOCOL_PORT=10000
+  #   ports:
+  #     - 8000:8000
+  #     - 9000:9000
+  #     - 10000:10000
+  #   network_mode: host
