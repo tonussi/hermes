@@ -1,4 +1,4 @@
-package hashicorpraft
+package main
 
 import (
 	"bytes"
@@ -12,12 +12,13 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb"
-	"github.com/r3musketeers/hermes/pkg/proxy"
+	"github.com/r3musketeers/hermes/pkg/kv"
 )
 
 type HashicorpRaftMessage struct {
@@ -25,18 +26,24 @@ type HashicorpRaftMessage struct {
 	Data []byte
 }
 
-type HashicorpRaftOrderer struct {
+type FSM struct {
 	nodeID          string
 	address         string
 	raft            *raft.Raft
 	proposalTimeout time.Duration
 
-	handle proxy.HandleOrderedMessageFunc
+	joinAddr string
 
+	store   *kv.KV
 	history map[string][]byte
+
+	connCount      int
+	messageConnMap map[string]int
+	connMap        map[int]*net.TCPConn
+	connMux        sync.RWMutex
 }
 
-func NewHashicorpRaftOrderer(
+func NewFSM(
 	nodeID string,
 	addrStr string,
 	transportTimeout time.Duration,
@@ -45,7 +52,9 @@ func NewHashicorpRaftOrderer(
 	proposalTimeout time.Duration,
 	listenJoinAddr string,
 	joinAddr string,
-) (*HashicorpRaftOrderer, error) {
+	valueSize int,
+	keyRange int,
+) (*FSM, error) {
 	config := raft.DefaultConfig()
 	config.LocalID = raft.ServerID(nodeID)
 
@@ -58,7 +67,7 @@ func NewHashicorpRaftOrderer(
 		addrStr,
 		addr,
 		3,
-		10*time.Second,
+		transportTimeout,
 		os.Stderr,
 	)
 	if err != nil {
@@ -81,15 +90,23 @@ func NewHashicorpRaftOrderer(
 		return nil, err
 	}
 
-	orderer := &HashicorpRaftOrderer{
+	fsm := &FSM{
 		nodeID:          nodeID,
 		address:         addrStr,
 		proposalTimeout: proposalTimeout,
+
+		joinAddr: joinAddr,
+
+		store:   kv.NewKV(),
+		history: map[string][]byte{},
+
+		messageConnMap: map[string]int{},
+		connMap:        map[int]*net.TCPConn{},
 	}
 
 	raftInstance, err := raft.NewRaft(
 		config,
-		orderer,
+		fsm,
 		boltDB,
 		boltDB,
 		snapshotStore,
@@ -99,7 +116,7 @@ func NewHashicorpRaftOrderer(
 		return nil, err
 	}
 
-	orderer.raft = raftInstance
+	fsm.raft = raftInstance
 
 	if joinAddr == "" {
 		configSingle := raft.Configuration{
@@ -129,41 +146,44 @@ func NewHashicorpRaftOrderer(
 		resp.Body.Close()
 	}
 
+	// listen join thread
 	if listenJoinAddr != "" {
 		go func() {
-			http.HandleFunc("/hashicorp-raft/join", orderer.joinHandler)
+			http.HandleFunc("/hashicorp-raft/join", fsm.joinHandler)
 
 			log.Println("listening join requests at", listenJoinAddr)
 			http.ListenAndServe(listenJoinAddr, nil)
 		}()
 	}
 
-	return orderer, nil
+	baseValue := make([]byte, valueSize)
+
+	log.Println("pre-populating kv")
+	for i := 0; i <= keyRange; i++ {
+		fsm.store.Set(uint64(i), baseValue)
+	}
+	log.Println("done")
+
+	return fsm, nil
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// proxy.Orderer interface implementation
-//
-////////////////////////////////////////////////////////////////////////////////
-
-func (orderer *HashicorpRaftOrderer) SetOrderedMessageHandler(
-	handle proxy.HandleOrderedMessageFunc,
-) {
-	orderer.handle = handle
-}
-
-func (orderer *HashicorpRaftOrderer) Process(data []byte) ([]byte, error) {
-	if orderer.raft.State() != raft.Leader {
+func (fsm *FSM) Process(req kv.Request) ([]byte, error) {
+	if fsm.raft.State() != raft.Leader {
 		return nil, errors.New("not a raft leader")
 	}
 
+	if req.Op != kv.GetOp && req.Op != kv.SetOp && req.Op != kv.DelOp {
+		return nil, errors.New("unsupported operation")
+	}
+
+	messageID := uuid.NewString()
+
 	buffer := bytes.NewBuffer([]byte{})
 	gob.NewEncoder(buffer).Encode(
-		HashicorpRaftMessage{ID: uuid.NewString(), Data: data},
+		HashicorpRaftMessage{ID: messageID, Data: req.Serialize()},
 	)
 
-	raftFuture := orderer.raft.Apply(buffer.Bytes(), orderer.proposalTimeout)
+	raftFuture := fsm.raft.Apply(buffer.Bytes(), fsm.proposalTimeout)
 
 	err := raftFuture.Error()
 
@@ -176,54 +196,53 @@ func (orderer *HashicorpRaftOrderer) Process(data []byte) ([]byte, error) {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-func (orderer *HashicorpRaftOrderer) Apply(logEntry *raft.Log) interface{} {
+func (fsm *FSM) Apply(logEntry *raft.Log) interface{} {
 	var message HashicorpRaftMessage
 
 	buffer := bytes.NewReader(logEntry.Data)
 	gob.NewDecoder(buffer).Decode(&message)
 
-	resp, err := orderer.handle(message.Data)
-	if err != nil {
-		return err
+	req := kv.Request{}
+	req.Parse(message.Data)
+
+	resp := []byte{}
+
+	switch req.Op {
+	case kv.GetOp:
+		resp = fsm.store.Get(req.Key)
+	case kv.SetOp:
+		fsm.store.Set(req.Key, req.Data)
+		resp = []byte{0}
+	case kv.DelOp:
+		fsm.store.Delete(req.Key)
+		resp = []byte{0}
 	}
 
 	return resp
 }
 
-func (orderer *HashicorpRaftOrderer) Snapshot() (raft.FSMSnapshot, error) {
-	return orderer.snapshot(), nil
+func (fsm *FSM) Snapshot() (raft.FSMSnapshot, error) {
+	history := map[string][]byte{}
+
+	for id, message := range fsm.history {
+		history[id] = message
+	}
+
+	snapshot := HashicorpRaftSnapshot(history)
+
+	return &snapshot, nil
 }
 
-func (orderer *HashicorpRaftOrderer) Restore(snapshotReader io.ReadCloser) error {
+func (fsm *FSM) Restore(snapshotReader io.ReadCloser) error {
 	snapshot := &HashicorpRaftSnapshot{}
 	err := gob.NewDecoder(snapshotReader).Decode(snapshot)
 	if err != nil {
 		return err
 	}
 
-	orderer.restore(snapshot)
+	for id, message := range *snapshot {
+		fsm.history[id] = message
+	}
 
 	return nil
-}
-
-// Unexported methods
-
-func (orderer *HashicorpRaftOrderer) snapshot() *HashicorpRaftSnapshot {
-	history := map[string][]byte{}
-
-	for id, message := range orderer.history {
-		history[id] = message
-	}
-
-	snapshot := HashicorpRaftSnapshot(history)
-
-	return &snapshot
-}
-
-func (orderer *HashicorpRaftOrderer) restore(
-	snapshot *HashicorpRaftSnapshot,
-) {
-	for id, message := range *snapshot {
-		orderer.history[id] = message
-	}
 }
