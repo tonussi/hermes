@@ -29,12 +29,11 @@ func main() {
 
 	raftAddr := os.Getenv("PROTOCOL_IP") + ":" + os.Getenv("PROTOCOL_PORT")
 
-	tcpCommunicator, err := communication.NewTCPCommunicator(
+	tcpCommunicator, err := communication.NewHTTPCommunicator(
 		*listenAddr,
 		*deliveryAddr,
 		5,
 		2*time.Second,
-		*bufferSize,
 	)
 	if err != nil {
 		log.Fatal(err.Error())
