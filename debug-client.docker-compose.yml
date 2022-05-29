@@ -7,4 +7,5 @@ services:
       context: ./
     ports:
       - 2345:2345
-    command: "--listen=:2345 --headless=true --log=true --log-output=debugger,debuglineerr,gdbwire,lldbout,rpc --accept-multiclient --api-version=2 exec ./http-log-client"
+    # command: "--listen=:2345 --headless=true --log=true --log-output=debugger,debuglineerr,gdbwire,lldbout,rpc --accept-multiclient --api-version=2 exec ./http-log-client"
+    command: "--listen=:2345 --headless=true --log=true --log-output=debugger --accept-multiclient --api-version=2 exec ./http-log-client"

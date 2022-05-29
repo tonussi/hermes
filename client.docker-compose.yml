@@ -13,7 +13,6 @@ services:
     volumes:
       - ./configs:/src/configs
       - ./secrets:/src/secrets
-      - ./:/src
     networks:
       - fullstack
   http-log-client:

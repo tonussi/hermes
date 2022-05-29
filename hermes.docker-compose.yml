@@ -6,53 +6,24 @@ services:
     environment:
       - NODE_ID=http-log-server
     network_mode: host
-  # http-log-client:
-  #   build:
-  #     dockerfile: client.dockerfile
-  #     context: ./
-  #   environment:
-  #     - NODE_ID=http-log-client
-  #   command:
-  #     - "-d"
-  #     - "hermes-leader:8000"
-  #   networks:
-  #     - fullstack
-  #   depends_on:
-  #     - http-log-server
-  #   links:
-  #     - http-log-server
-  #   restart: on-failure:5
-
+  http-log-client:
+    image: lptonussi/public:http-log-client
+    environment:
+      - NODE_ID=http-log-client
   hermes-leader:
     build:
       dockerfile: hermes.dockerfile
       context: ./
+    volumes:
+      - /tmp/hermesfiles/:/data/
     environment:
-      - NODE_ID=hermes-leader
-    network_mode: host
+      - NODE_ID=localhost
+      - PROTOCOL_IP=localhost
+      - PROTOCOL_PORT=10000
     depends_on:
       - http-log-server
-    # ports:
-    #   - 8000:8000
-    # depends_on:
-    #   - http-log-server
-    #   - http-log-client
-  # hermes-follower:
-  #   build:
-  #     dockerfile: hermes.dockerfile
-  #     context: ./
-  #   environment:
-  #     - NODE_ID=hermes-follower
-  #   command:
-  #     - "-j"
-  #     - "hermes-leader:9000"
-  #   ports:
-  #     - 9000:9000
-  #     - 10000:10000
-  #   depends_on:
-  #     - hermes-leader
-  #     - http-log-server
-  #     - http-log-client
-# networks:
-#   fullstack:
-#     driver: bridge
+    ports:
+      - 8000:8000
+      - 9000:9000
+      - 10000:10000
+    network_mode: host
