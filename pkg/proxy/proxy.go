@@ -9,10 +9,7 @@ var (
 	_orderer      Orderer
 )
 
-func Init(
-	communicator Communicator,
-	orderer Orderer,
-) {
+func Init(communicator Communicator, orderer Orderer) {
 	_communicator = communicator
 	_orderer = orderer
 }
@@ -26,6 +23,8 @@ func NewHermesProxy(
 	communicator Communicator,
 	orderer Orderer,
 ) *HermesProxy {
+	Init(communicator, orderer)
+
 	return &HermesProxy{
 		communicator: communicator,
 		orderer:      orderer,
@@ -41,9 +40,9 @@ func (proxy *HermesProxy) Run() error {
 // Unexported functions
 
 func (proxy *HermesProxy) handleIncomingMessage(data []byte) ([]byte, error) {
-	return proxy.orderer.Process(data)
+	return _orderer.Process(data)
 }
 
 func (proxy *HermesProxy) handleOrderedMessage(data []byte) ([]byte, error) {
-	return proxy.communicator.Deliver(data)
+	return _communicator.Deliver(data)
 }
