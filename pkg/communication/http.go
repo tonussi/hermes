@@ -66,7 +66,8 @@ func (comm *HTTPCommunicator) Deliver(data []byte) ([]byte, error) {
 
 	// see data that has been returned to the client
 	bodyString := string(body)
-	log.Print(bodyString)
+	log.Println(bodyString)
+	log.Println(comm.urlPath)
 
 	return body, err
 }
