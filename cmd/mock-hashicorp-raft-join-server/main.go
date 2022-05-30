@@ -53,7 +53,7 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/hashicorp-raft/join":
 		bodyString := getBodyAsString(r)
-		fmt.Fprintf(w, "Body: %+v\n", bodyString)
+		fmt.Fprintf(w, "%s", bodyString)
 
 		encapsulateDelivery := encapsulateDelivery(r)
 		log.Printf("%v+", encapsulateDelivery)

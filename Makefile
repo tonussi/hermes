@@ -9,8 +9,6 @@ DOCKERHUB_USER_NAME=lptonussi
 
 
 
-
-
 build_debug_server:
 	docker-compose -f debug-server.docker-compose.yml up --build
 
@@ -32,7 +30,8 @@ build_client:
 build_client_with_python_server:
 	docker-compose -f go-client-python-server.docker-compose.yml up --build
 
-
+build_mock:
+	docker-compose -f mock-hashicorp-raft-join-server.docker-compose.yml up --build
 
 
 
@@ -52,7 +51,8 @@ run_server:
 run_client:
 	docker-compose -f client.docker-compose.yml up
 
-
+run_mock:
+	docker-compose -f mock-hashicorp-raft-join-server.docker-compose.yml up
 
 
 
@@ -91,3 +91,5 @@ docker_down:
 	docker-compose -f client.docker-compose.yml down
 	docker-compose -f server.docker-compose.yml down
 	docker-compose -f hermes.docker-compose.yml down
+	docker-compose -f mock-hashicorp-raft-join-server.docker-compose.yml
+
