@@ -59,47 +59,16 @@ func (comm *HTTPCommunicator) Deliver(data []byte) ([]byte, error) {
 
 	switch comm.method {
 	case "GET":
-		req, err = http.NewRequest("GET", "http://"+comm.toAddr+comm.r.RequestURI, nil)
-		if err != nil {
-			panic(err)
-		}
-
-		res, err = client.Do(req)
-		if err != nil {
-			panic(err)
-		}
-
+		req, _ = http.NewRequest("GET", "http://"+comm.toAddr+comm.r.RequestURI, nil)
+		res, _ = client.Do(req)
 		defer res.Body.Close()
-
-		if err = res.Write(&buf); err != nil {
-			panic(err)
-		}
-
-		fmt.Println(buf.String())
+		res.Write(&buf)
 	case "POST":
-		bodyIoReader := payloadBytesAsBufferedReader(comm.bodyBytes)
-
-		if err != nil {
-			panic(err)
-		}
-
-		req, err = http.NewRequest("POST", "http://"+comm.toAddr+comm.r.RequestURI, bodyIoReader)
-		if err != nil {
-			panic(err)
-		}
-
-		res, err = client.Do(req)
-		if err != nil {
-			panic(err)
-		}
-
+		bodyIoReader := bytes.NewBuffer(comm.bodyBytes)
+		req, _ = http.NewRequest("POST", "http://"+comm.toAddr+comm.r.RequestURI, bodyIoReader)
+		res, _ = client.Do(req)
 		defer res.Body.Close()
-
-		if err = res.Write(&buf); err != nil {
-			panic(err)
-		}
-
-		fmt.Println(buf.String())
+		res.Write(&buf)
 	}
 
 	return buf.Bytes(), err
@@ -110,36 +79,16 @@ func (comm *HTTPCommunicator) requestHandler(w http.ResponseWriter, r *http.Requ
 	comm.method = r.Method
 	comm.urlPath = r.URL.Path
 	comm.requestURI = r.RequestURI
-	var httpTextBytes bytes.Buffer
-
-	bodyBytes, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		panic(err)
-	}
-
+	// Save http request body for later
+	bodyBytes, _ := ioutil.ReadAll(r.Body)
 	comm.bodyBytes = bodyBytes
-
-	// https://stackoverflow.com/a/69055473
+	var httpTextBytes bytes.Buffer
 	r.Write(&httpTextBytes)
-
 	comm.httpTextBytes = httpTextBytes.Bytes()
 	fmt.Println(httpTextBytes.String())
-
-	resp, err := handle(comm.httpTextBytes)
-
-	if err != nil {
-		panic(err)
-	}
-
+	resp, _ := handle(comm.httpTextBytes)
 	bodyResponseFromAppServer := string(resp)
-	log.Print(bodyResponseFromAppServer)
+	log.Println("Resposta do servidor http-log-server (python)")
+	log.Println(bodyResponseFromAppServer)
 	fmt.Fprintf(w, "%+v", resp)
-
-	if err != nil {
-		panic(err)
-	}
-}
-
-func payloadBytesAsBufferedReader(data []byte) (ioBufferedValues *bytes.Buffer) {
-	return bytes.NewBuffer(data)
 }
