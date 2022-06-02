@@ -6,17 +6,14 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/tonussi/studygo/pkg/proxy"
 )
 
 type HTTPCommunicator struct {
-	fromAddr      string
-	toAddr        string
-	urlPath       string
-	method        string
-	requestURI    string
+	fromAddr string
+	toAddr   string
+
 	httpTextBytes []byte
 	bodyBytes     []byte
 	r             *http.Request
@@ -25,16 +22,10 @@ type HTTPCommunicator struct {
 func NewHTTPCommunicator(
 	fromAddr string,
 	toAddr string,
-	connAttempts int,
-	connAttemptPeriod time.Duration,
 ) (*HTTPCommunicator, error) {
-
-	http.Get("http://" + toAddr + "/pulse")
-
 	return &HTTPCommunicator{
 		fromAddr: fromAddr,
 		toAddr:   toAddr,
-		urlPath:  "/",
 	}, nil
 }
 
@@ -73,9 +64,6 @@ func (comm *HTTPCommunicator) Deliver(data []byte) ([]byte, error) {
 
 func (comm *HTTPCommunicator) requestHandler(w http.ResponseWriter, r *http.Request, handle proxy.HandleIncomingMessageFunc) {
 	comm.r = r
-	comm.method = r.Method
-	comm.urlPath = r.URL.Path
-	comm.requestURI = r.RequestURI
 
 	// Save http request body for later
 	bodyBytes, _ := ioutil.ReadAll(r.Body)

@@ -31,8 +31,6 @@ func main() {
 	tcpCommunicator, err := communication.NewHTTPCommunicator(
 		*listenAddr,
 		*deliveryAddr,
-		5,
-		2*time.Second,
 	)
 	if err != nil {
 		log.Fatal(err.Error())
