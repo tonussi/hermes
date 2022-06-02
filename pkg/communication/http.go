@@ -57,19 +57,16 @@ func (comm *HTTPCommunicator) Deliver(data []byte) ([]byte, error) {
 	var req *http.Request
 	var err error
 
-	switch comm.method {
-	case "GET":
-		req, _ = http.NewRequest("GET", "http://"+comm.toAddr+comm.r.RequestURI, nil)
-		res, _ = client.Do(req)
-		defer res.Body.Close()
-		res.Write(&buf)
-	case "POST":
-		bodyIoReader := bytes.NewBuffer(comm.bodyBytes)
-		req, _ = http.NewRequest("POST", "http://"+comm.toAddr+comm.r.RequestURI, bodyIoReader)
-		res, _ = client.Do(req)
-		defer res.Body.Close()
-		res.Write(&buf)
+	bodyIoReader := bytes.NewBuffer(comm.bodyBytes)
+	req, _ = http.NewRequest(comm.r.Method, "http://"+comm.toAddr+comm.r.RequestURI, bodyIoReader)
+	res, err = client.Do(req)
+
+	if err != nil {
+		log.Println(err.Error())
 	}
+
+	defer res.Body.Close()
+	res.Write(&buf)
 
 	return buf.Bytes(), err
 }
@@ -85,10 +82,12 @@ func (comm *HTTPCommunicator) requestHandler(w http.ResponseWriter, r *http.Requ
 	var httpTextBytes bytes.Buffer
 	r.Write(&httpTextBytes)
 	comm.httpTextBytes = httpTextBytes.Bytes()
+
 	fmt.Println(httpTextBytes.String())
 	resp, _ := handle(comm.httpTextBytes)
+
 	bodyResponseFromAppServer := string(resp)
-	log.Println("Resposta do servidor http-log-server (python)")
-	log.Println(bodyResponseFromAppServer)
-	fmt.Fprintf(w, "%+v", resp)
+	// log.Println("Resposta do servidor http-log-server (python)")
+	// log.Println(bodyResponseFromAppServer)
+	fmt.Fprintf(w, "%s", bodyResponseFromAppServer)
 }
