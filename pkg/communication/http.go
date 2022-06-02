@@ -76,6 +76,7 @@ func (comm *HTTPCommunicator) requestHandler(w http.ResponseWriter, r *http.Requ
 	comm.method = r.Method
 	comm.urlPath = r.URL.Path
 	comm.requestURI = r.RequestURI
+
 	// Save http request body for later
 	bodyBytes, _ := ioutil.ReadAll(r.Body)
 	comm.bodyBytes = bodyBytes
@@ -87,6 +88,7 @@ func (comm *HTTPCommunicator) requestHandler(w http.ResponseWriter, r *http.Requ
 	resp, _ := handle(comm.httpTextBytes)
 
 	bodyResponseFromAppServer := string(resp)
+
 	// log.Println("Resposta do servidor http-log-server (python)")
 	// log.Println(bodyResponseFromAppServer)
 	fmt.Fprintf(w, "%s", bodyResponseFromAppServer)
