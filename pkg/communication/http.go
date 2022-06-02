@@ -83,7 +83,7 @@ func (comm *HTTPCommunicator) requestHandler(w http.ResponseWriter, r *http.Requ
 	r.Write(&httpTextBytes)
 	comm.httpTextBytes = httpTextBytes.Bytes()
 
-	fmt.Println(httpTextBytes.String())
+	// fmt.Println(httpTextBytes.String())
 	resp, _ := handle(comm.httpTextBytes)
 
 	bodyResponseFromAppServer := string(resp)
