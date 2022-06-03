@@ -30,7 +30,7 @@ func NewHTTPCommunicator(
 }
 
 func (comm *HTTPCommunicator) Listen(handle proxy.HandleIncomingMessageFunc) error {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { comm.requestHandler(w, r, handle) })
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { comm.InterceptClientRequest(w, r, handle) })
 
 	err := http.ListenAndServe(comm.fromAddr, nil)
 
@@ -62,7 +62,7 @@ func (comm *HTTPCommunicator) Deliver(data []byte) ([]byte, error) {
 	return buf.Bytes(), err
 }
 
-func (comm *HTTPCommunicator) requestHandler(w http.ResponseWriter, r *http.Request, handle proxy.HandleIncomingMessageFunc) {
+func (comm *HTTPCommunicator) InterceptClientRequest(w http.ResponseWriter, r *http.Request, handle proxy.HandleIncomingMessageFunc) {
 	comm.r = r
 
 	// Save http request body for later
