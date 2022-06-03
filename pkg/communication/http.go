@@ -13,6 +13,7 @@ import (
 type HTTPCommunicator struct {
 	fromAddr string
 	toAddr   string
+	nodeID   string
 
 	httpTextBytes []byte
 	bodyBytes     []byte
@@ -23,6 +24,7 @@ type HTTPCommunicator struct {
 func NewHTTPCommunicator(
 	fromAddr string,
 	toAddr string,
+	nodeID string,
 ) (*HTTPCommunicator, error) {
 	// Creates a client to be used inside Deliver
 	// This client will act as a http requester
@@ -33,6 +35,7 @@ func NewHTTPCommunicator(
 		fromAddr: fromAddr,
 		toAddr:   toAddr,
 		client:   client,
+		nodeID:   nodeID,
 	}, nil
 }
 
@@ -76,6 +79,7 @@ func (comm *HTTPCommunicator) Deliver(data []byte) ([]byte, error) {
 	// If something wrong happens here its important to treat
 	// Because the server did not receive the message
 	// All the other replicas received
+	log.Printf("[NODE ID] %s", comm.nodeID)
 	res, err = comm.client.Do(req)
 	if err != nil {
 		log.Fatal(err.Error())
@@ -92,6 +96,7 @@ func (comm *HTTPCommunicator) Deliver(data []byte) ([]byte, error) {
 
 	// Return the bytes
 	return buf.Bytes(), err
+	// return comm.bodyBytes, err
 
 	// res.Body.Close() is now invoked
 }
@@ -116,7 +121,7 @@ func (comm *HTTPCommunicator) InterceptClientRequest(w http.ResponseWriter, r *h
 	comm.httpTextBytes = httpTextBytes.Bytes()
 
 	// Send bytes to be ordered
-	resp, err := handle(comm.httpTextBytes)
+	resp, err := handle(comm.bodyBytes)
 	// Receive ordered bytes
 	// This error is important to be treated
 	// Errors here means that the ordering failed
