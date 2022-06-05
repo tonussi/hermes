@@ -31,7 +31,6 @@ func main() {
 	communicator, err := communication.NewHTTPCommunicator(
 		*listenAddr,
 		*deliveryAddr,
-		nodeID,
 	)
 	if err != nil {
 		log.Fatal(err.Error())

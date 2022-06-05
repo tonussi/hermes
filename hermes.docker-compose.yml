@@ -1,21 +1,9 @@
 version: "3"
 
 services:
-  http-log-server:
-    image: lptonussi/public:http-log-server
-    ports:
-      - 8001:8001
-    network_mode: host
-  hashicrop-mock-server:
+  hermes-followers:
     build:
-      dockerfile: mock-hashicorp-raft-join-server.dockerfile
-      context: ./
-    ports:
-      - 9000:9000
-    network_mode: host
-  hermes-leader:
-    build:
-      dockerfile: debug-hermes.dockerfile
+      dockerfile: hermes.dockerfile
       context: ./
     volumes:
       - /tmp/data/hermes/:/data/hermes/
@@ -27,12 +15,3 @@ services:
       - 8000:8000
       - 9000:9000
       - 10000:10000
-      - 2345:2345
-    network_mode: host
-    depends_on:
-      - http-log-server
-      - hashicrop-mock-server
-  http-log-client:
-    image: lptonussi/public:http-log-client
-    depends_on:
-      - hermes-leader
