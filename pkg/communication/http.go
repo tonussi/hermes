@@ -1,6 +1,7 @@
 package communication
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io/ioutil"
@@ -11,23 +12,17 @@ import (
 )
 
 type HTTPCommunicator struct {
-	fromAddr   string
-	toAddr     string
-	RequestURI string
-	Method     string
+	fromAddr string
+	toAddr   string
 }
 
 func NewHTTPCommunicator(
 	fromAddr string,
 	toAddr string,
 ) (*HTTPCommunicator, error) {
-
-	http.Get("http://" + toAddr + "/pulse")
-
 	return &HTTPCommunicator{
-		fromAddr:   fromAddr,
-		toAddr:     toAddr,
-		RequestURI: "/",
+		fromAddr: fromAddr,
+		toAddr:   toAddr,
 	}, nil
 }
 
@@ -35,74 +30,84 @@ func (comm *HTTPCommunicator) Listen(handle proxy.HandleIncomingMessageFunc) err
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { comm.requestHandler(w, r, handle) })
 
 	err := http.ListenAndServe(comm.fromAddr, nil)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 
 	return err
 }
 
 func (comm *HTTPCommunicator) Deliver(data []byte) ([]byte, error) {
-	// build url to post
-	deliveryFullUrlString := comm.buildHttpUrlPath()
+	str1 := string(data[:])
+	fmt.Println("String =", str1)
 
-	// payload bytes as buffered reader
-	bufferedPayload := payloadBytesAsBufferedReader(data)
+	var actualRequestRecovered *http.Request
 
-	// delivery to a server
-	var resp *http.Response
 	var err error
-	if comm.Method == "GET" {
-		resp, err = http.Get(deliveryFullUrlString)
-	} else {
-		resp, err = http.Post(deliveryFullUrlString, "application/json", bufferedPayload)
-	}
+
+	requestAsByffer := bytes.NewReader(data)
+
+	requestRecovered := bufio.NewReader(requestAsByffer)
+
+	actualRequestRecovered, err = http.ReadRequest(requestRecovered)
+
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln(err.Error())
 	}
 
-	// close response body
-	defer resp.Body.Close()
+	actualRequestRecovered.Header.Set("Host", "http://"+comm.toAddr+actualRequestRecovered.RequestURI)
+	actualRequestRecovered.URL.Host = comm.toAddr
+	actualRequestRecovered.Host = comm.toAddr
+	actualRequestRecovered.RequestURI = ""
+	actualRequestRecovered.URL.Scheme = "http"
 
-	// read body response
-	body, err := ioutil.ReadAll(resp.Body)
+	client := &http.Client{}
+
+	res, err := client.Do(actualRequestRecovered)
+
 	if err != nil {
-		log.Printf("Reading body failed: %s", err)
-		return nil, err
+		log.Fatalln(err.Error())
 	}
 
-	// see data that has been returned to the client
-	bodyString := string(body)
-	log.Println(bodyString)
-	log.Println(comm.RequestURI)
+	bodyBytes, _ := ioutil.ReadAll(res.Body)
 
-	return body, err
+	defer res.Body.Close()
+
+	// var bufferedResponseHolder = &bytes.Buffer{}
+
+	// err = res.Write(bufferedResponseHolder)
+
+	// if err != nil {
+	// 	log.Fatalln(err.Error())
+	// }
+
+	return bodyBytes, err
 }
 
-// Extra functions to clean code a little bit
-
 func (comm *HTTPCommunicator) requestHandler(w http.ResponseWriter, r *http.Request, handle proxy.HandleIncomingMessageFunc) {
-	comm.RequestURI = r.RequestURI
-	comm.Method = r.Method
-	bodyBytes, _ := ioutil.ReadAll(r.Body)
+	var bufferedRequestHolder = &bytes.Buffer{}
 
-	log.Println("handling connection reading bytes and sending to handler")
+	var err error
 
-	resp, err := handle(bodyBytes)
+	err = r.Write(bufferedRequestHolder)
 
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln(err.Error())
+	}
+
+	resp, err := handle(bufferedRequestHolder.Bytes())
+
+	if err != nil {
+		log.Fatalln(err.Error())
 	}
 
 	bodyString := string(resp)
-	log.Print(bodyString)
+
+	fmt.Println("String =", bodyString)
+
 	fmt.Fprintf(w, "%+v", bodyString)
+
 	if err != nil {
-		log.Fatalln(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
-}
-
-func (comm *HTTPCommunicator) buildHttpUrlPath() string {
-	return "http://" + comm.toAddr + comm.RequestURI
-}
-
-func payloadBytesAsBufferedReader(data []byte) (ioBufferedValues *bytes.Buffer) {
-	return bytes.NewBuffer(data)
 }
