@@ -38,8 +38,8 @@ func (comm *HTTPCommunicator) Listen(handle proxy.HandleIncomingMessageFunc) err
 }
 
 func (comm *HTTPCommunicator) Deliver(data []byte) ([]byte, error) {
-	str1 := string(data[:])
-	fmt.Println("String =", str1)
+	// str1 := string(data[:])
+	// fmt.Println("String =", str1)
 
 	var actualRequestRecovered *http.Request
 
@@ -102,10 +102,9 @@ func (comm *HTTPCommunicator) requestHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	bodyString := string(resp)
-
-	fmt.Println("String =", bodyString)
-
 	fmt.Fprintf(w, "%+v", bodyString)
+
+	// fmt.Println("String =", bodyString)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
