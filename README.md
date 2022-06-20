@@ -4,6 +4,14 @@
 
 Para alterar o package busque todas as ocorrências de `tonussi/hermes` e altere para `xyz/hermes`, também é necessário criar um repositório no Github `xyz/hermes`.
 
+Depois de alterar o nome do pacote GO, remova os arquivos go.mod e go.sum e execute as linhas a seguir:
+
+```sh
+go mod init github.com/tonussi/hermes
+go mod tidy
+go get -u all
+```
+
 Para desenvolver é necessário instalar Docker Compose, Docker, Go, Vscode, make.
 
 Uma vez instalados é possível apenas executar `make build_debug_hermes`, para gerar imagem de contêiner para um Hermes com depurador Delve embutido.
