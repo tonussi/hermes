@@ -1,3 +1,9 @@
+# Código fonte
+
+A fonte primária do Hermes está aqui [Hermes original]([https://](https://github.com/r3musketeers/hermes)).
+
+O presente repositório trouxe parte do código Hermes para desenvolvimento de um trabalho de conclusão de curso.
+
 # Desenvolvimento
 
 É necessário alterar o GO package de `tonussi/hermes` para `xyz/hermes`.
