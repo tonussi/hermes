@@ -1,133 +1,112 @@
 package communication
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 
-	"github.com/tonussi/studygo/pkg/proxy"
+	"github.com/tonussi/hermes/pkg/proxy"
 )
 
 type HTTPCommunicator struct {
 	fromAddr string
 	toAddr   string
-
-	httpTextBytes []byte
-	bodyBytes     []byte
-	r             *http.Request
-	client        *http.Client
 }
 
 func NewHTTPCommunicator(
 	fromAddr string,
 	toAddr string,
 ) (*HTTPCommunicator, error) {
-	// Creates a client to be used inside Deliver
-	// This client will act as a http requester
-	client := &http.Client{}
-
-	// Constructor of the HTTPCommunicator class
 	return &HTTPCommunicator{
 		fromAddr: fromAddr,
 		toAddr:   toAddr,
-		client:   client,
 	}, nil
 }
 
 func (comm *HTTPCommunicator) Listen(handle proxy.HandleIncomingMessageFunc) error {
-	// Set a handler function for the http[s]://www.{ip}:{port}/
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { comm.InterceptClientRequest(w, r, handle) })
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { comm.requestHandler(w, r, handle) })
 
-	// Start to server the http server to receive the requests
 	err := http.ListenAndServe(comm.fromAddr, nil)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 
-	// Return errors of the listen and server
 	return err
 }
 
 func (comm *HTTPCommunicator) Deliver(data []byte) ([]byte, error) {
-	// Data that enters Deliver is garanteed to be ordered already
+	// str1 := string(data[:])
+	// fmt.Println("String =", str1)
 
-	// TODO(developer): investigate bug of Hermes when Hermes starts
-	if comm.httpTextBytes == nil {
-		return nil, nil
-	}
+	var actualRequestRecovered *http.Request
 
-	var buf bytes.Buffer
-	var res *http.Response
-	var req *http.Request
 	var err error
 
-	// Restore the request that was previous formatted as bytes by the InterceptClientRequest function
-	bodyIoReader := bytes.NewBuffer(comm.bodyBytes)
+	requestAsByffer := bytes.NewReader(data)
 
-	// Build the request using the client
-	req, err = http.NewRequest(comm.r.Method, "http://"+comm.toAddr+comm.r.RequestURI, bodyIoReader)
+	requestRecovered := bufio.NewReader(requestAsByffer)
 
-	// Add the Header to the request
-	req.Header = comm.r.Header
+	actualRequestRecovered, err = http.ReadRequest(requestRecovered)
+
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatalln(err.Error())
 	}
 
-	// Do the request to the Server
-	// If something wrong happens here its important to treat
-	// Because the server did not receive the message
-	// All the other replicas received
-	res, err = comm.client.Do(req)
+	actualRequestRecovered.Header.Set("Host", "http://"+comm.toAddr+actualRequestRecovered.RequestURI)
+	actualRequestRecovered.URL.Host = comm.toAddr
+	actualRequestRecovered.Host = comm.toAddr
+	actualRequestRecovered.RequestURI = ""
+	actualRequestRecovered.URL.Scheme = "http"
+
+	client := &http.Client{}
+
+	res, err := client.Do(actualRequestRecovered)
+
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatalln(err.Error())
 	}
 
-	// defer statement is executed, and places
-	// res.Body.Close() on a list to be executed
-	// prior to the function returning
+	bodyBytes, _ := ioutil.ReadAll(res.Body)
+
 	defer res.Body.Close()
 
-	// Write the response of the Stateful Service to Hermes
-	// SS -> H
-	res.Write(&buf)
+	// var bufferedResponseHolder = &bytes.Buffer{}
 
-	// Return the bytes
-	return buf.Bytes(), err
+	// err = res.Write(bufferedResponseHolder)
 
-	// res.Body.Close() is now invoked
+	// if err != nil {
+	// 	log.Fatalln(err.Error())
+	// }
+
+	return bodyBytes, err
 }
 
-func (comm *HTTPCommunicator) InterceptClientRequest(w http.ResponseWriter, r *http.Request, handle proxy.HandleIncomingMessageFunc) {
-	// The request that enters here
-	// Is not ordered yet
-	// And is a request pointed to Hermes, not to the Stateful Service
-	// Save client request
-	comm.r = r
+func (comm *HTTPCommunicator) requestHandler(w http.ResponseWriter, r *http.Request, handle proxy.HandleIncomingMessageFunc) {
+	var bufferedRequestHolder = &bytes.Buffer{}
 
-	// Put on a list to be executed after the return
-	defer r.Body.Close()
+	var err error
 
-	// Save body in byte array format
-	bodyBytes, _ := ioutil.ReadAll(r.Body)
-	comm.bodyBytes = bodyBytes
+	err = r.Write(bufferedRequestHolder)
 
-	// Save HTTP text request in bytes format
-	var httpTextBytes bytes.Buffer
-	r.Write(&httpTextBytes)
-	comm.httpTextBytes = httpTextBytes.Bytes()
-
-	// Send bytes to be ordered
-	resp, err := handle(comm.httpTextBytes)
-	// Receive ordered bytes
-	// This error is important to be treated
-	// Errors here means that the ordering failed
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatalln(err.Error())
 	}
 
-	// Transform the bytes that were sent
-	bodyResponseFromAppServer := string(resp)
+	resp, err := handle(bufferedRequestHolder.Bytes())
 
-	// Use the http writter to answer to the client
-	// Can be omitted if you don't want Hermes answering back
-	fmt.Fprintf(w, "%s", bodyResponseFromAppServer)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	bodyString := string(resp)
+	fmt.Fprintf(w, "%+v", bodyString)
+
+	// fmt.Println("String =", bodyString)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
 }

@@ -3,11 +3,11 @@ version: "3"
 services:
   http-log-server:
     build:
-      dockerfile: mock-hashicorp-raft-join-server.dockerfile
+      dockerfile: server.dockerfile
       context: ./
     command:
       - "-l"
-      - ":9000"
+      - ":8001"
     ports:
-      - 9000:9000
+      - 8001:8001
     network_mode: "host"

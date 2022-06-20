@@ -1,4 +1,4 @@
-module github.com/tonussi/studygo
+module github.com/tonussi/hermes
 
 go 1.18
 

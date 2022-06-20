@@ -15,7 +15,7 @@ do
     printf "\n"
     echo "reading on hermes"
     printf "\n"
-    curl --request GET http://$ADDR:$PORT/line/?number=-1
+    curl --request GET http://$ADDR:$PORT/line/-1
     printf "\n"
 done
 
@@ -24,7 +24,7 @@ do
     printf "\n"
     echo "reading on hermes"
     printf "\n"
-    curl --request GET http://$ADDR:$PORT/line/?number=$i
+    curl --request GET http://$ADDR:$PORT/line/$i
     printf "\n"
 done
 

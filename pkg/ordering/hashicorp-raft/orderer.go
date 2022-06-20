@@ -17,7 +17,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb"
-	"github.com/tonussi/studygo/pkg/proxy"
+	"github.com/tonussi/hermes/pkg/proxy"
 )
 
 type HashicorpRaftMessage struct {
@@ -154,6 +154,9 @@ func (orderer *HashicorpRaftOrderer) SetOrderedMessageHandler(
 }
 
 func (orderer *HashicorpRaftOrderer) Process(data []byte) ([]byte, error) {
+	// str1 := string(data[:])
+	// fmt.Println("String =", str1)
+
 	if orderer.raft.State() != raft.Leader {
 		return nil, errors.New("not a raft leader")
 	}
