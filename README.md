@@ -1,5 +1,9 @@
 # Desenvolvimento
 
+É necessário alterar o GO package de `tonussi/hermes` para `xyz/hermes`.
+
+Para alterar o package busque todas as ocorrências de `tonussi/hermes` e altere para `xyz/hermes`, também é necessário criar um repositório no Github `xyz/hermes`.
+
 Para desenvolver é necessário instalar Docker Compose, Docker, Go, Vscode, make.
 
 Uma vez instalados é possível apenas executar `make build_debug_hermes`, para gerar imagem de contêiner para um Hermes com depurador Delve embutido.
