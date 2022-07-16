@@ -1,14 +1,14 @@
 <mxfile host="65bd71144e">
     <diagram id="juAPqdta2TmEA3TIUsYs" name="Page-1">
-        <mxGraphModel dx="1933" dy="725" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1201" dy="725" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
                 <mxCell id="4_Cqj1JRkxiIV1RBsEop-1" value="&lt;p style=&quot;margin: 4px 0px 0px ; text-align: center ; font-size: 13px&quot;&gt;&lt;font style=&quot;font-size: 13px&quot;&gt;&lt;i style=&quot;font-size: 13px&quot;&gt;&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;/i&gt;&lt;br style=&quot;font-size: 13px&quot;&gt;&lt;b style=&quot;font-size: 13px&quot;&gt;Communicator&lt;/b&gt;&lt;/font&gt;&lt;/p&gt;&lt;hr style=&quot;font-size: 13px&quot;&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px ; font-size: 13px&quot;&gt;&lt;font style=&quot;font-size: 13px ; line-height: 200%&quot;&gt;+ Listen(IncomingMessageHandler): error&lt;br style=&quot;font-size: 13px&quot;&gt;+ Deliver(Array&amp;lt;byte&amp;gt;): (Array&amp;lt;byte&amp;gt;, error)&lt;/font&gt;&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=13;fontFamily=Helvetica;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="60" y="360" width="340" height="110" as="geometry"/>
+                    <mxGeometry x="40" y="40" width="360" height="110" as="geometry"/>
                 </mxCell>
                 <mxCell id="4_Cqj1JRkxiIV1RBsEop-2" value="&lt;p style=&quot;margin: 4px 0px 0px ; text-align: center ; font-size: 13px&quot;&gt;&lt;font style=&quot;font-size: 13px&quot;&gt;&lt;i style=&quot;font-size: 13px&quot;&gt;&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;/i&gt;&lt;br style=&quot;font-size: 13px&quot;&gt;&lt;b style=&quot;font-size: 13px&quot;&gt;Orderer&lt;/b&gt;&lt;/font&gt;&lt;/p&gt;&lt;hr style=&quot;font-size: 13px&quot;&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px ; font-size: 13px&quot;&gt;&lt;font style=&quot;font-size: 13px ; line-height: 200%&quot;&gt;+ SetOrderedMessageHandler(OrderedMessageHandler)&lt;/font&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px ; font-size: 13px&quot;&gt;&lt;font style=&quot;font-size: 13px ; line-height: 200%&quot;&gt;+ Process(Array&amp;lt;byte&amp;gt;): (Array&amp;lt;byte&amp;gt;, error)&lt;/font&gt;&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=13;fontFamily=Helvetica;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-2.5" y="520" width="465" height="110" as="geometry"/>
+                    <mxGeometry x="40" y="200" width="360" height="110" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
